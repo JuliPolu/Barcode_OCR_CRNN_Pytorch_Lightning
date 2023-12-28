@@ -12,6 +12,7 @@ class LossConfig(BaseModel):
 
 
 class DataConfig(BaseModel):
+    data_path: str
     batch_size: int
     num_iterations: int
     n_workers: int
@@ -31,6 +32,7 @@ class Config(BaseModel):
     device: int
     monitor_metric: str
     monitor_mode: str
+    weights_path: str
     model_kwargs: dict
     optimizer: str
     optimizer_kwargs: dict

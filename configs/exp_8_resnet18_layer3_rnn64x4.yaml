@@ -6,10 +6,14 @@ accelerator: 'gpu'
 device: 0
 monitor_metric: 'valid_ctc_loss'
 monitor_mode: 'min'
+weights_path: './models/ts_script_model/final_ocr.pt'
 
 model_kwargs:
   backbone_name: 'resnet18'
   pretrained: true
+  cnn_out_index: 3
+  cnn_output_size: 256
+  cnn_output_height: 6
   rnn_features_num: 48
   rnn_hidden_size: 64
   rnn_num_layers: 4
@@ -36,6 +40,7 @@ losses:
     loss_kwargs: {}
 
 data_config:
+  data_path: './data'
   batch_size: 48
   num_iterations: 100
   n_workers: 4

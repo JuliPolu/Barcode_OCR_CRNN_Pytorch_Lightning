@@ -4,12 +4,13 @@ import pytorch_lightning as pl
 from config import Config
 from losses import get_losses
 from metrics import get_metrics
+from typing import Dict, Tuple
 from utils import load_object
 from models import CRNN
 
 
 class OCRModule(pl.LightningModule):
-    def __init__(self, config: Config):
+    def __init__(self, config: Config) -> None:
         super().__init__()
         self._config = config
 
@@ -26,7 +27,7 @@ class OCRModule(pl.LightningModule):
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         return self._model(x)
 
-    def configure_optimizers(self):
+    def configure_optimizers(self) -> Dict:
         optimizer = load_object(self._config.optimizer)(
             self._model.parameters(),
             **self._config.optimizer_kwargs,
@@ -42,10 +43,10 @@ class OCRModule(pl.LightningModule):
             },
         }
 
-    def training_step(self, batch, batch_idx):
+    def training_step(self, batch: Tuple[torch.Tensor, torch.Tensor, torch.Tensor], batch_idx: int) -> torch.Tensor:
         images, targets, target_lengths = batch
         log_probs = self(images)
-        input_lengths = torch.IntTensor([log_probs.size(0)] * images.size(0))
+        input_lengths = torch.as_tensor([log_probs.size(0)] * images.size(0), dtype=torch.int, device=log_probs.device)
         loss_value = self._calculate_loss(
             log_probs,
             targets,
@@ -58,7 +59,7 @@ class OCRModule(pl.LightningModule):
 
         return loss_value
 
-    def validation_step(self, batch, batch_idx):
+    def validation_step(self, batch: Tuple[torch.Tensor, torch.Tensor, torch.Tensor], batch_idx: int) -> None:
         images, targets, target_lengths = batch
         log_probs = self(images)
         input_lengths = torch.IntTensor([log_probs.size(0)] * images.size(0))

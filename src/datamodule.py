@@ -3,7 +3,7 @@ import os
 import pandas as pd
 from pytorch_lightning import LightningDataModule
 from torch.utils.data import DataLoader, Dataset, RandomSampler
-
+import torch
 from constants import DATA_PATH
 from config import DataConfig
 from transforms import get_transforms
@@ -32,18 +32,18 @@ class OCRDM(LightningDataModule):
         self.valid_dataset: Optional[Dataset] = None
         self.train_sampler: Optional[RandomSampler] = None
 
-    def setup(self, stage: Optional[str] = None):
-        df_train = read_df(DATA_PATH, 'train')
-        df_valid = read_df(DATA_PATH, 'valid')
+    def setup(self, stage: Optional[str] = None) -> None:
+        df_train = read_df(self._config.data_path, 'train')
+        df_valid = read_df(self._config.data_path, 'valid')
 
         self.train_dataset = BarCodeDataset(
             df=df_train,
-            data_folder=DATA_PATH,
+            data_folder=self._config.data_path,
             transforms=self._train_transforms,
         )
         self.valid_dataset = BarCodeDataset(
             df=df_valid,
-            data_folder=DATA_PATH,
+            data_folder=self._config.data_path,
             transforms=self._valid_transforms,
         )
 
@@ -60,7 +60,7 @@ class OCRDM(LightningDataModule):
             num_workers=self._config.n_workers,
             sampler=self.train_sampler,
             shuffle=False if self.train_sampler else True,
-            pin_memory=True,
+            pin_memory=torch.cuda.is_available(),
         )
 
     def val_dataloader(self) -> DataLoader:
