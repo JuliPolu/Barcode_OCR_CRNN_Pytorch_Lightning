@@ -1,13 +1,13 @@
 import os
-from typing import Union, Optional
+from typing import Union, Optional, TypeAlias, Tuple, List
 import pandas as pd
-
+import numpy as np
 import albumentations as albu
 import cv2
 from torch.utils.data import Dataset
 
 
-TRANSFORM_TYPE = Union[albu.BasicTransform, albu.BaseCompose]
+TRANSFORM_TYPE: TypeAlias = Union[albu.BasicTransform, albu.BaseCompose]
 
 
 class BarCodeDataset(Dataset):
@@ -18,16 +18,12 @@ class BarCodeDataset(Dataset):
         transforms: Optional[TRANSFORM_TYPE] = None,
     ):
         self.transforms = transforms
-
-        self.crops = []
-        self.codes = []
-        for i in range(len(df)):
-            crop = cv2.imread(os.path.join(data_folder, df['filename'][i]))[..., ::-1]
-
-            self.crops.append(crop)
-            self.codes.append(str(df['code'][i]))
-
-    def __getitem__(self, idx):
+        self.datafolder = data_folder
+        self.df = df
+        self.codes = self.cache_labels()
+        self.crops = self.cache_images()
+  
+    def __getitem__(self, idx: int) -> Tuple[np.ndarray, str, int]:
         text = self.codes[idx]
         image = self.crops[idx]
 
@@ -42,5 +38,23 @@ class BarCodeDataset(Dataset):
 
         return data['image'], data['text'], data['text_length']
 
-    def __len__(self):
+    def __len__(self) -> int:
         return len(self.crops)
+
+    def cache_images(self) -> List[np.ndarray]:
+        crops = []
+        for i in range(len(self.df)):
+            image_path = os.path.join(self.datafolder, self.df['filename'][i])
+            crop = cv2.imread(image_path)
+            if crop is not None:
+                crop = crop[..., ::-1]
+                crops.append(crop)
+            else:
+                print(f"Failed to load image: {image_path}")
+        return crops
+
+    def cache_labels(self) -> List[str]:
+        codes = []
+        for i in range(len(self.df)):
+            codes.append(str(self.df['code'][i]))
+        return codes
