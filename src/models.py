@@ -12,11 +12,6 @@ class CRNN(nn.Module):
     def __init__(self, config: Config) -> None:
         super().__init__()
         self._config = config.model_kwargs
-        self.rnn_hidden_size: int = 64,
-        self.rnn_dropout: float = 0.1,
-        self.rnn_bidirectional: bool = True,
-        self.rnn_num_layers: int = 2,
-        self.num_classes: int = 11,
         
         self.backbone = create_model(
             self._config['backbone_name'],

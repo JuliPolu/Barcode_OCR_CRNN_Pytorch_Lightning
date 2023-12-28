@@ -69,7 +69,7 @@ class OCRDM(LightningDataModule):
             batch_size=self._config.batch_size,
             num_workers=self._config.n_workers,
             shuffle=False,
-            pin_memory=True,
+            pin_memory=torch.cuda.is_available(),
         )
 
 
