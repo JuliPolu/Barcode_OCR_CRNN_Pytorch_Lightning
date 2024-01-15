@@ -4,6 +4,9 @@
 
 Создание модели распознавания цифр на штрих-кодах (OCR) по фотографиям.
 
+Данный репозиторий подготовлен в рамках 2-й проектной работы курса 'CV-Rocket' от команды Deepschool, часть по созданию и тренировке модели OCR.
+
+
 ### Датасет
 
 Трейн датасет включает 540 фото, предварительно собранных с помощью Tолоки.
@@ -17,12 +20,18 @@ crop_barcodes.py
 - запустить [скрипт](crop_barcodes.py), чтобы вырезать кропы баркодов для ускорения обучение 
 - входной размер изображения и бекбон для CRNN. Для этого используется [эта](notebooks/подбор параметров.ipynb) тетрадка.
 
+
+## Используемый стэк
+
+Python, Pytorch, albumentations, Pytorch Lightning, onnxruntime, pydantic, wemake
+
+
 ### Обучение
 
 Запуск тренировки:
 
-```
-PYTHONPATH=. ./src/train.py ./configs/exp_8_resnet18_layer3_rnn64x4.yaml
+```bash
+make run_training
 ```
 
 ### Логи финальной модели в ClearML
@@ -34,28 +43,34 @@ PYTHONPATH=. ./src/train.py ./configs/exp_8_resnet18_layer3_rnn64x4.yaml
 
 ### Актуальная версия чекпойнта модели:
 
-dvc pull models/checkpoint/epoch_epoch=48-valid_ctc_loss=0.218.ckpt.dvc
+```bash
+make dvc_checkpoint
+```
 
 ### Актуальная версия сохраненной torscript модели:
 
-dvc pull models/ts_script_model/final_ocr.pt.dvc
+```bash
+make dvc_pull
+```
+
 
 ### Инеренс
 
 Посмотреть результаты работы обученной сети можно посмотреть в [тетрадке](notebooks/анализ результатов.ipynb)
 
 А также запустить скрипт для конвертации чекпойнта в onnx
-```
-python src/convert_checkpoint.py --checkpoint ./models/checkpoint/epoch_epoch=48-valid_ctc_loss=0.218.ckpt
+
+
+```bash
+make convert_checkpoint
 ```
 
 И запустить скрипт для инференса
-```
-PYTHONPATH=.  python ./src/infer.py --model_path ./models/ts_script_model/final_ocr.pt --image_path ./data/images/000a8eff-08fb-4907-8b34-7a13ca7e37ea--ru.8e3b8a9a-9090-46ba-9c6c-36f5214c606d.jpg
+
+```bash
+make inference
 ```
 
 ### Комментарии и история экспериментов 
 
-Кратко подбор параметров и оставшиеся вопросы описаны в файле [HISTORY&COMMENTS.md](HISTORY&COMMENTS.md)
-
-Очень бы хотела получить максимально развернутые коментарии по корректности используемых параметров и вообще по лучшим практикам, так как опыта пока маловато, и любой комментарий очень ценен!
+Кратко подбор параметров в файле [HISTORY&COMMENTS.md](HISTORY&COMMENTS.md)

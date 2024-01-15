@@ -1,7 +1,6 @@
 import torch
 from lightning_module import OCRModule
 import argparse 
-# import onnx
 
 
 def arg_parse():
